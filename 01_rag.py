@@ -84,25 +84,25 @@ if db.is_connected():
 
 
 cursor = db.cursor()
-cursor.execute("SELECT * FROM customer")
-data = cursor.fetchall()
-print(data)
+# cursor.execute("SELECT * FROM customer")
+# data = cursor.fetchall()
+# print(data)
 
 
 
-cursor.execute("SELECT * FROM customer WHERE customer_id = 'C005'")
-data = cursor.fetchone()
-print(data)
+# cursor.execute("SELECT * FROM customer WHERE customer_id = 'C005'")
+# data = cursor.fetchone()
+# print(data)
 
 
 
-customer_id = input("Enter Customer ID: ")
-cursor.execute(
-    "SELECT * FROM customer WHERE customer_id = %s",
-    (customer_id,)
-)
-data = cursor.fetchone()
-print(data)
+# customer_id = input("Enter Customer ID: ")
+# cursor.execute(
+#     "SELECT * FROM customer WHERE customer_id = %s",
+#     (customer_id,)
+# )
+# data = cursor.fetchone()
+# print(data)
 
 
 
@@ -158,3 +158,30 @@ print(data)
 llm_with_tool = llm.bind_tools([get_customer,get_order,get_ticket])
 
 
+from langchain.agents import create_agent
+
+agent = create_agent(
+     model="google_genai:gemini-3.6-flash",
+     tools=[get_customer,get_order,get_ticket]
+
+)
+
+while True:
+     
+     question = input("Enter Your Question : ")
+
+
+     if question.lower() == "exit":
+        break
+
+     result = agent.invoke(
+         {
+              "messages":[
+                   {
+                        "role":"user",
+                        "content":question
+                   }
+              ]
+         }
+        )
+     print(result["messages"][-1].content)
