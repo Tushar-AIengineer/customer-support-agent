@@ -47,37 +47,7 @@ def get_policy(question):
     docs = retriever.invoke(question)
     return docs
 
-
-while True:
-    question = input("enter your question : ")
-          
-    if question.lower() == "exit":
-            break
-
-    docs = get_policy.invoke({"question":question})
-
-    context = ""
-
-    for doc in docs:
-         context += doc.page_content + "\n"
-
-    prompt = f"answer the question only using the context below    context: {context}  question:{question}"
-    
-    responce = llm.invoke(prompt)
-
-    print("\nAI :")
-    # print(responce.content)
-    print(responce.content[0]["text"])
-
-    print("\n")
-
-# "Damaged product ka return kitne time mein kar sakta hoon?"
-# "Mujhe wrong product mila hai, kya refund mil sakta hai?"
-# "Return period kitna hai?"
-# "Refund process hone mein kitna time lagta hai?"
-# "Kya damaged product ka return shipping charge mujhe dena padega?"
-# "Kya customer ke dwara damaged product return ho sakta hai?"
-# "Order ship hone ke baad cancel kar sakte hain?"
+# docs = get_policy.invoke({"question":question})
 
 password = os.getenv("password")
 
@@ -118,7 +88,7 @@ cursor = db.cursor()
 
 # from langchain.tools import tool
 
-customer_id = input("enter customer id : ")
+# customer_id = input("enter customer id : ")
 
 @tool
 def get_customer(customer_id):
@@ -128,12 +98,11 @@ def get_customer(customer_id):
           "SELECT * FROM customer WHERE customer_id = %s",
           (customer_id,)
      )
-
      data = cursor.fetchone()
      return data
 
-data = get_customer.invoke({"customer_id":customer_id})
-print(data)
+# data = get_customer.invoke({"customer_id":customer_id})
+# print(data)
 
 
 @tool
@@ -147,8 +116,8 @@ def get_order(customer_id):
      data = cursor.fetchone()
      return data 
 
-data = get_order.invoke({"customer_id":customer_id})
-print(data)
+# data = get_order.invoke({"customer_id":customer_id})
+# print(data)
 
 
 @tool
@@ -161,8 +130,9 @@ def get_ticket(customer_id):
      data = cursor.fetchone()
      return(data)
 
-data = get_ticket.invoke({"customer_id":customer_id})
-print(data)
+# data = get_ticket.invoke({"customer_id":customer_id})
+# print(data)
+
    
 llm_with_tool = llm.bind_tools([get_customer,get_order,get_ticket,get_policy])
 
@@ -208,7 +178,9 @@ while True:
               ]
          }
         )
-     print(result["messages"][-1].content)
+     print(result["messages"][-1].content[0]["text"])
+     # print(result["messages"][-1].content)
+     # print(responce.content[0]["text"])
+# print(result["messages"][-1].content)
 
-
-
+# print(result["messages"][-1].content[0]["text"])
