@@ -38,9 +38,11 @@ llm = ChatGoogleGenerativeAI(
     google_api_key = API_KEY
     )
 
+from langchain.tools import tool
 
+@tool
 def get_policy(question):
-     
+    "if customer wanted to know the policy of return of product and days and other policy related terms because they ara a rag based tool"
     retriever = vector_store.as_retriever()
     docs = retriever.invoke(question)
     return docs
@@ -52,7 +54,7 @@ while True:
     if question.lower() == "exit":
             break
 
-    docs = get_policy(question)
+    docs = get_policy.invoke({"question":question})
 
     context = ""
 
@@ -114,7 +116,7 @@ cursor = db.cursor()
 
 
 
-from langchain.tools import tool
+# from langchain.tools import tool
 
 customer_id = input("enter customer id : ")
 
@@ -162,14 +164,14 @@ def get_ticket(customer_id):
 data = get_ticket.invoke({"customer_id":customer_id})
 print(data)
    
-llm_with_tool = llm.bind_tools([get_customer,get_order,get_ticket])
+llm_with_tool = llm.bind_tools([get_customer,get_order,get_ticket,get_policy])
 
 
 from langchain.agents import create_agent
 
 agent = create_agent(
      model="google_genai:gemini-3.6-flash",
-     tools=[get_customer,get_order,get_ticket]
+     tools=[get_customer,get_order,get_ticket,get_policy]
 
 )
 
