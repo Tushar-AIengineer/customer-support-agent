@@ -3,6 +3,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
+
 import mysql.connector
 
 import os
@@ -32,20 +33,26 @@ vector_store = Chroma.from_documents(
     embedding = embedding
 )
 
-retriever = vector_store.as_retriever()
-
 llm = ChatGoogleGenerativeAI(
     model = "gemini-3.6-flash",
     google_api_key = API_KEY
-)
+    )
+
+
+def get_policy(question):
+     
+    retriever = vector_store.as_retriever()
+    docs = retriever.invoke(question)
+    return docs
+
 
 while True:
     question = input("enter your question : ")
-
+          
     if question.lower() == "exit":
             break
 
-    docs = retriever.invoke(question)
+    docs = get_policy(question)
 
     context = ""
 
@@ -185,3 +192,6 @@ while True:
          }
         )
      print(result["messages"][-1].content)
+
+
+
