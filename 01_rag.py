@@ -171,9 +171,24 @@ from langchain.agents import create_agent
 
 agent = create_agent(
      model="google_genai:gemini-3.6-flash",
-     tools=[get_customer,get_order,get_ticket,get_policy]
+     tools=[get_customer,get_order,get_ticket,get_policy],
+     system_prompt="""
+      You are a customer support agent.
 
-)
+      Always answer briefly and directly.
+      For simple questions, answer in 1-3 short sentences or bullet points.
+      Do not give unnecessary explanations.
+
+      Only answer questions related to the company's
+      products, orders, returns, refunds, payments, policies,
+      tickets, and customer support.
+
+      If the question is unrelated to the company or customer support,
+      politely refuse to answer and say that you only handle
+      customer support related queries.
+          """
+            )
+
 
 while True:
      
