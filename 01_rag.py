@@ -136,6 +136,8 @@ def get_ticket(customer_id):
    
 llm_with_tool = llm.bind_tools([get_customer,get_order,get_ticket,get_policy])
 
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from langchain.agents import create_agent
 
@@ -158,27 +160,60 @@ agent = create_agent(
       customer support related queries.
           """
             )
+history = InMemoryChatMessageHistory()
 
+chatbot = RunnableWithMessageHistory(
+    agent,
+    lambda session_id: history,
+    input_messages_key="messages"
+)
 
 while True:
      
      question = input("Enter Your Question : ")
-
+     
 
      if question.lower() == "exit":
         break
 
-     result = agent.invoke(
+     # result = chatbot.invoke(
+     #     {
+     #          "messages":[
+     #               {
+     #                    "role":"user",
+     #                    "content":question
+     #               }
+     #          ]
+     #     }
+     #    )
+
+     # result = chatbot.invoke(
+     #    question,
+     #    config={
+     #        "configurable": {
+     #           "session_id": "123"
+     #      }
+     #    }
+     # )
+     result = chatbot.invoke(
          {
-              "messages":[
-                   {
-                        "role":"user",
-                        "content":question
-                   }
-              ]
+             "messages":[
+                 {
+                     "role":"user",
+                     "content":question
+                 }
+             ]
+         },
+         config={
+             "configurable":{
+                 "session_id":"123"
+             }
          }
-        )
+     )
+
+    
      print(result["messages"][-1].content[0]["text"])
+     # print(result["messages"][-1].content[0]["text"])
      # print(result["messages"][-1].content)
      # print(responce.content[0]["text"])
 # print(result["messages"][-1].content)
