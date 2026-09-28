@@ -40,26 +40,32 @@ llm = ChatGoogleGenerativeAI(
 
 from langchain.tools import tool
 
+
 @tool
 def get_policy(question):
-    "if customer wanted to know the policy of return of product and days and other policy related terms because they ara a rag based tool"
-    retriever = vector_store.as_retriever()
-    docs = retriever.invoke(question)
-    return docs
+          "if customer wanted to know the policy of return of product and days and other policy related terms because they ara a rag based tool"
+          try:
+             retriever = vector_store.as_retriever()
+             docs = retriever.invoke(question)
+             return docs
+          except Exception as e:
+              return f"database error {e}"
 
 # docs = get_policy.invoke({"question":question})
 
 password = os.getenv("password")
-
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password=password,
-    database="customer_support"
+try:
+    db = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password=password,
+        database="customer_support"
 )
+    if db.is_connected():
+        print("MySQL Connected Successfully")
 
-if db.is_connected():
-    print("MySQL Connected Successfully")
+except Exception as e:
+     print(" database connection failed")
 
 
 cursor = db.cursor()
@@ -94,12 +100,15 @@ cursor = db.cursor()
 def get_customer(customer_id):
      """if customer_id can provide by user and want to know our email,name,phone"""
      """Get customer information such as name, email, and phone number using customer ID."""
-     cursor.execute(
+     try:
+          cursor.execute(
           "SELECT * FROM customer WHERE customer_id = %s",
-          (customer_id,)
-     )
-     data = cursor.fetchone()
-     return data
+           (customer_id,)
+           )
+          data = cursor.fetchone()
+          return data
+     except Exception as e:
+         return f"database error {e}"
 
 # data = get_customer.invoke({"customer_id":customer_id})
 # print(data)
@@ -109,13 +118,16 @@ def get_customer(customer_id):
 def get_order(customer_id):
      """if customer_id can provide by user and want to know our order status """
      """Get the customer's order information and order status using customer ID."""
-     cursor.execute(
-          "SELECT * FROM orders WHERE customer_id = %s",
-          (customer_id,)
-     )
-     data = cursor.fetchone()
-     return data 
-
+     try:
+          cursor.execute(
+                    "SELECT * FROM orders WHERE customer_id = %s",
+                    (customer_id,)
+               )
+          data = cursor.fetchone()
+          return data 
+     
+     except Exception as e:
+          return f"database error {e}"
 # data = get_order.invoke({"customer_id":customer_id})
 # print(data)
 
@@ -123,12 +135,15 @@ def get_order(customer_id):
 @tool
 def get_ticket(customer_id):
      """Get the customer's support ticket information using customer ID."""
-     cursor.execute(
-          "SELECT * FROM tickets WHERE customer_id = %s",
-          (customer_id,)
-     )
-     data = cursor.fetchone()
-     return(data)
+     try:
+          cursor.execute(
+                    "SELECT * FROM orders WHERE customer_id = %s",
+                    (customer_id,)
+               )
+          data = cursor.fetchone()
+          return data 
+     except Exception as e:
+          return f"database error {e}"
 
 # data = get_ticket.invoke({"customer_id":customer_id})
 # print(data)
@@ -195,21 +210,27 @@ while True:
      #      }
      #    }
      # )
-     result = chatbot.invoke(
-         {
-             "messages":[
-                 {
-                     "role":"user",
-                     "content":question
+     try:
+         result = chatbot.invoke(
+             {
+                 "messages":[
+                     {
+                         "role":"user",
+                         "content":question
+                     }
+                 ]
+             },
+             config={
+                 "configurable":{
+                     "session_id":"123"
                  }
-             ]
-         },
-         config={
-             "configurable":{
-                 "session_id":"123"
              }
-         }
-     )
+         )
+
+     except Exception as e:
+          print("something want wrong . please try again")
+    
+
 
     
      print(result["messages"][-1].content[0]["text"])
